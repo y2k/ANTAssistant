@@ -6,25 +6,40 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.android.Main
 import kotlinx.coroutines.launch
 
-class CommonPresenter<Model, Msg, View : BaseView>(
+class ElmPresenter<Model, Msg, View : BaseView>(
     private val init: () -> Pair<Model, (suspend () -> Msg)?>,
     private val update: (Model, Msg) -> Pair<Model, (suspend () -> Msg)?>,
     private val render: (View, Model) -> Unit
 ) : BasePresenter<View>() {
 
-    override fun doOnAttach() {
+    private var model: Model? = null
+
+    fun update(msg: Msg) {
         GlobalScope.launch(Dispatchers.Main) {
-            val (state, cmd) = init()
-            loop(state, cmd)
+            loop(model!!, suspend { msg })
         }
     }
 
-    private suspend fun loop(state: Model, cmd: (suspend () -> Msg)?) {
-        _view?.let { render(it, state) }
+    override fun doOnAttach() {
+        if (model == null) {
+            GlobalScope.launch(Dispatchers.Main) {
+                val (state, cmd) = init()
+                loop(state, cmd)
+            }
+        } else {
+            render(_view!!, model!!)
+        }
+    }
+
+    private suspend fun loop(model: Model, cmd: (suspend () -> Msg)?) {
+        this.model = model
+        _view?.let { render(it, model) }
 
         if (cmd != null) {
-            val (state2, cmd2) = update(state, cmd.invoke())
+            val (state2, cmd2) = update(model, cmd.invoke())
             loop(state2, cmd2)
         }
     }
 }
+
+typealias Upd<ViewModel, Event> = Pair<ViewModel, (suspend () -> Event)?>

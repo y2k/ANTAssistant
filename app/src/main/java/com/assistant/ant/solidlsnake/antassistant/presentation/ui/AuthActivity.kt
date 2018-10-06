@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import com.assistant.ant.solidlsnake.antassistant.R
 import com.assistant.ant.solidlsnake.antassistant.orEmpty
+import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.AuthComponent
 import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.AuthPresenter
 import com.assistant.ant.solidlsnake.antassistant.presentation.view.AuthView
 import kotlinx.android.synthetic.main.activity_auth.*
@@ -27,7 +28,7 @@ class AuthActivity : BaseActivity(), AuthView {
         btn_confirm.setOnClickListener {
             val login = et_login.text.orEmpty()
             val password = et_password.text.orEmpty()
-            presenter.auth(login, password)
+            presenter.update(AuthComponent.Event.Login(login, password))
         }
     }
 

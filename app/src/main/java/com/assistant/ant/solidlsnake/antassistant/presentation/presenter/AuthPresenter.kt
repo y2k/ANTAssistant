@@ -1,26 +1,57 @@
 package com.assistant.ant.solidlsnake.antassistant.presentation.presenter
 
 import com.assistant.ant.solidlsnake.antassistant.data.repository.RepositoryImpl
-import com.assistant.ant.solidlsnake.antassistant.domain.interactor.Auth
+import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.AuthComponent.ViewModel
 import com.assistant.ant.solidlsnake.antassistant.presentation.view.AuthView
-import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
-class AuthPresenter : BasePresenter<AuthView>() {
-    private val authUseCase = Auth(RepositoryImpl)
+/*
 
-    fun auth(login: String, password: String) = GlobalScope.launch(Dispatchers.Main) {
-        _view?.setProgress(true)
+type ViewModel = { isProgress : bool, result : bool option }
 
-        val result = withContext(Dispatchers.IO) { authUseCase.execute(login, password) }
+type Event =
+    | Login of string * string
+    | LoginResult of bool
 
-        _view?.setProgress(false)
+let init = { isProgress = false, result = None }, Cmd.none
 
-        if (result) {
-            _view?.success()
-        } else {
-            _view?.error()
-        }
+let update model = function
+    | Login (login, password) ->
+        { model with isProgress = true },
+        Cmd.ofAsync (RepositoryImpl.auth login password) LoginResult
+    | LoginResult result ->
+        { model with isProgress = false, result = Some result }, Cmd.none
 
+ */
+
+object AuthComponent {
+
+    data class ViewModel(val isProgress: Boolean, val result: Boolean?)
+
+    sealed class Event {
+        class Login(val login: String, val password: String) : Event()
+        class LoginResult(val result: Boolean) : Event()
+    }
+
+    fun init(): Upd<ViewModel, Event> =
+        ViewModel(false, null) to null
+
+    fun update(model: ViewModel, event: Event): Upd<ViewModel, Event> = when (event) {
+        is Event.Login ->
+            model.copy(isProgress = true) to
+                suspend { Event.LoginResult(RepositoryImpl.auth(event.login, event.password)) }
+        is Event.LoginResult ->
+            model.copy(isProgress = false, result = event.result) to
+                null
     }
 }
+
+private fun AuthView.render(model: ViewModel) {
+    setProgress(model.isProgress)
+    when (model.result) {
+        true -> success()
+        false -> error()
+    }
+}
+
+fun AuthPresenter() =
+    ElmPresenter(AuthComponent::init, AuthComponent::update, AuthView::render)
