@@ -1,6 +1,7 @@
 package com.assistant.ant.solidlsnake.antassistant.presentation.presenter
 
-import com.assistant.ant.solidlsnake.antassistant.data.repository.RepositoryImpl.getUserData
+import com.assistant.ant.solidlsnake.antassistant.data.await
+import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import com.assistant.ant.solidlsnake.antassistant.domain.entity.UserData
 import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.MainComponent.ViewModel
 import com.assistant.ant.solidlsnake.antassistant.presentation.view.MainView
@@ -9,7 +10,9 @@ object MainComponent {
 
     fun init(): Upd<ViewModel, Event> =
         ViewModel(true, null) to
-            suspend { getUserData().let(Event::NewData) }
+            suspend {
+                PureRepository.getUserData().await().let(Event::NewData)
+            }
 
     fun update(model: ViewModel, event: Event): Upd<ViewModel, Event> =
         model.copy(progress = false, data = (event as Event.NewData).data) to null

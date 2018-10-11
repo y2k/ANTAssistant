@@ -6,7 +6,7 @@ import com.assistant.ant.solidlsnake.antassistant.domain.entity.State
 import com.assistant.ant.solidlsnake.antassistant.domain.entity.Tariff
 import com.assistant.ant.solidlsnake.antassistant.domain.entity.UserData
 
-class NetUserDataMapper : Mapper<NetUserData, UserData> {
+object NetUserDataMapper : Mapper<NetUserData, UserData> {
     override fun map(from: NetUserData): UserData {
         val state = State(
                 from.state__balance,

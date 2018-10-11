@@ -1,6 +1,7 @@
 package com.assistant.ant.solidlsnake.antassistant.presentation.presenter
 
-import com.assistant.ant.solidlsnake.antassistant.data.repository.RepositoryImpl
+import com.assistant.ant.solidlsnake.antassistant.data.await
+import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.AuthComponent.ViewModel
 import com.assistant.ant.solidlsnake.antassistant.presentation.view.AuthView
 
@@ -15,9 +16,9 @@ type Event =
 let init = { isProgress = false, result = None }, Cmd.none
 
 let update model = function
-    | Login (login, password) ->
+    | Login (handleAuthorization, password) ->
         { model with isProgress = true },
-        Cmd.ofAsync (RepositoryImpl.auth login password) LoginResult
+        Cmd.ofAsync (RepositoryImpl.auth handleAuthorization password) LoginResult
     | LoginResult result ->
         { model with isProgress = false, result = Some result }, Cmd.none
 
@@ -38,7 +39,9 @@ object AuthComponent {
     fun update(model: ViewModel, event: Event): Upd<ViewModel, Event> = when (event) {
         is Event.Login ->
             model.copy(isProgress = true) to
-                suspend { Event.LoginResult(RepositoryImpl.auth(event.login, event.password)) }
+                suspend {
+                    PureRepository.auth(event.login, event.password).await().let(Event::LoginResult)
+                }
         is Event.LoginResult ->
             model.copy(isProgress = false, result = event.result) to
                 null

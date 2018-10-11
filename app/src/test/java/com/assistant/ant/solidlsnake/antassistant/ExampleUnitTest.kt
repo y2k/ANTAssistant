@@ -1,16 +1,31 @@
 package com.assistant.ant.solidlsnake.antassistant
 
-import org.junit.Assert.assertEquals
+import com.assistant.ant.solidlsnake.antassistant.data.Eff
+import com.assistant.ant.solidlsnake.antassistant.data.parser.Parser
+import com.assistant.ant.solidlsnake.antassistant.data.pref.Store
+import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import org.junit.Test
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
+
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun `parse test`() {
+        assert(Parser.isLogged("<html><head><title>Информация о счете</title></head></html>"))
+    }
+
+    @Test
+    fun `auth test`() {
+        val auth = PureRepository.auth("login", "password")
+
+        for (r in auth) {
+            when (r) {
+                is Eff.WebRequest ->
+                    r.result = "<html><head><title>Информация о счете</title></head></html>"
+                is Eff.ReadDb ->
+                    r.result = Store("", "", false, null)
+                is Eff.WriteDb -> Unit
+                is Eff.Result<*> -> assert(r.x as Boolean)
+            }
+        }
     }
 }

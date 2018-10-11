@@ -5,15 +5,16 @@ import org.jsoup.Jsoup
 import java.util.regex.Pattern
 
 object Parser {
+
     private const val SUCCESS_TITLE = "Информация о счете"
     private const val STATUS_ACTIVE = "Активна"
 
-    suspend fun isLogged(body: String): Boolean {
+    fun isLogged(body: String): Boolean {
         val doc = Jsoup.parse(body)
         return doc.title() == SUCCESS_TITLE
     }
 
-    suspend fun userData(body: String): NetUserData {
+    fun userData(body: String): NetUserData {
         val data = NetUserData()
 
         val doc = Jsoup.parse(body)
