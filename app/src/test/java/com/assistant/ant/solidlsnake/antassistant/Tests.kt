@@ -6,8 +6,6 @@ import com.assistant.ant.solidlsnake.antassistant.data.pref.Store
 import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import org.junit.Test
 
-private const val HTML = "<html><head><title>Информация о счете</title></head></html>"
-
 class Tests {
 
     @Test
@@ -30,5 +28,9 @@ class Tests {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val HTML = "<html><head><title>Информация о счете</title></head></html>"
     }
 }
