@@ -10,9 +10,15 @@ sealed class Eff<TR : Any, out T> {
 
     class ReadDb : Eff<Store, Nothing>()
 
-    class WriteDb(val db: Store) : Eff<Nothing, Nothing>()
+    class WriteDb(val db: Store) : Eff<Unit, Nothing>()
 
-    class Result<T>(val x: T) : Eff<Nothing, T>()
+    class Result<T>(val x: T) : Eff<Unit, T>()
 
-    lateinit var result: TR
+    fun consume(x: TR) {
+        this._result = x
+    }
+
+    private lateinit var _result: TR
+    val result: TR
+        get() = _result
 }

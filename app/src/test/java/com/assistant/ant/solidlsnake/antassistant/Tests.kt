@@ -6,11 +6,13 @@ import com.assistant.ant.solidlsnake.antassistant.data.pref.Store
 import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import org.junit.Test
 
-class ExampleUnitTest {
+private const val HTML = "<html><head><title>Информация о счете</title></head></html>"
+
+class Tests {
 
     @Test
     fun `parse test`() {
-        assert(Parser.isLogged("<html><head><title>Информация о счете</title></head></html>"))
+        assert(Parser.isLogged(HTML))
     }
 
     @Test
@@ -19,12 +21,13 @@ class ExampleUnitTest {
 
         for (r in auth) {
             when (r) {
-                is Eff.WebRequest ->
-                    r.result = "<html><head><title>Информация о счете</title></head></html>"
-                is Eff.ReadDb ->
-                    r.result = Store("", "", false, null)
-                is Eff.WriteDb -> Unit
-                is Eff.Result<*> -> assert(r.x as Boolean)
+                is Eff.WebRequest -> r.consume("<html><head><title>Информация о счете</title></head></html>")
+                is Eff.ReadDb -> r.consume(Store("", "", false, null))
+                is Eff.WriteDb -> r.consume(Unit)
+                is Eff.Result<*> -> {
+                    r.consume(Unit)
+                    assert(r.x as Boolean)
+                }
             }
         }
     }
