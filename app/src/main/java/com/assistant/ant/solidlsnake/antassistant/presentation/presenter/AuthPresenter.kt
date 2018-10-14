@@ -1,6 +1,6 @@
 package com.assistant.ant.solidlsnake.antassistant.presentation.presenter
 
-import com.assistant.ant.solidlsnake.antassistant.data.await
+import com.assistant.ant.solidlsnake.antassistant.data.common.await
 import com.assistant.ant.solidlsnake.antassistant.data.repository.PureRepository
 import com.assistant.ant.solidlsnake.antassistant.presentation.presenter.AuthComponent.ViewModel
 import com.assistant.ant.solidlsnake.antassistant.presentation.view.AuthView
