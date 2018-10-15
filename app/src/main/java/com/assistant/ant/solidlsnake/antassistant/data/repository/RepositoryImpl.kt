@@ -37,7 +37,7 @@ object PureRepository {
         yield(Eff.Result(userData))
     }
 
-    private fun saveAuthResult(db: Store, body: String, login: String, password: String): Store {
+    fun saveAuthResult(db: Store, body: String, login: String, password: String): Store {
         val result = Parser.isLogged(body)
         val db =
             if (result) {
@@ -48,7 +48,7 @@ object PureRepository {
         return db.copy(isAuthorized = result)
     }
 
-    private fun mkLoginRequest(login: String, password: String): Request =
+    fun mkLoginRequest(login: String, password: String): Request =
         Request.Builder()
             .url(BASE_URL)
             .post(
