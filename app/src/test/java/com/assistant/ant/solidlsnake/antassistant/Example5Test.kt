@@ -1,3 +1,5 @@
+@file:Suppress("ClassName", "MemberVisibilityCanBePrivate")
+
 package com.assistant.ant.solidlsnake.antassistant
 
 import com.assistant.ant.solidlsnake.antassistant.data.pref.Store
@@ -6,11 +8,25 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import org.junit.Test
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
+import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 import kotlin.coroutines.resume
 
 class Example5Test {
+
+    fun auth____(login: String, password: String): Foo__<Boolean> {
+        val r = PureRepository.mkLoginRequest(login, password)
+        return Foo__.Foo1(r) { body ->
+            Foo__.Foo2 { inputDb ->
+                val db = PureRepository.saveAuthResult(inputDb, body, login, password)
+                Foo__.Foo3(db) {
+                    Foo__.Foo4(db.isAuthorized)
+                }
+            }
+        }
+    }
 
     fun auth(login: String, password: String) = run {
         val r = PureRepository.mkLoginRequest(login, password)
@@ -37,7 +53,28 @@ class Example5Test {
 
     }
 
-    suspend fun auth__(login: String, password: String) {
+    class FooScope : Continuation<Unit> {
+
+        override fun resumeWith(result: Result<Unit>) = result.getOrThrow()
+        override val context = EmptyCoroutineContext
+
+        var continuations_: Foo_? = null
+
+        suspend fun <T> foo____(f: (Continuation<T>) -> Foo_): T {
+            return suspendCoroutineUninterceptedOrReturn<T> {
+                continuations_ = f(it)
+                COROUTINE_SUSPENDED
+            }
+        }
+    }
+
+    fun fooScope(block: suspend FooScope.() -> Unit): FooScope {
+        val scope = FooScope()
+        block.createCoroutineUnintercepted(receiver = scope, completion = scope)
+        return scope
+    }
+
+    fun auth__(login: String, password: String): FooScope = fooScope {
 
         val r = PureRepository.mkLoginRequest(login, password)
 
@@ -125,13 +162,13 @@ class Example5Test {
     @Test(timeout = 1000)
     fun test__() = runBlocking<Unit> {
         println("1") // FIXME:
-        auth__("", "")
+        val scope = auth__("", "")
         println("2") // FIXME:
 
         var continue_ = true
         while (continue_) {
-            val c = continuations_
-            continuations_ = null
+            val c = scope.continuations_
+            scope.continuations_ = null
             when (c) {
                 is Foo_.Foo1 -> {
                     val html = suspend {
@@ -168,7 +205,14 @@ class Example5Test {
     lateinit var continuation__: Pair<Unit, Continuation<Store>>
     lateinit var continuation___: Pair<Store, Continuation<Unit>>
     var continuations: Foo? = null
-    var continuations_: Foo_? = null
+//    var continuations_: Foo_? = null
+
+    sealed class Foo__<T> {
+        class Foo1<T>(val a: Request, val b: (String) -> Foo__<T>) : Foo__<T>()
+        class Foo2<T>(val b: (Store) -> Foo__<T>) : Foo__<T>()
+        class Foo3<T>(val a: Store, val b: () -> Foo__<T>) : Foo__<T>()
+        class Foo4<T>(val a: T) : Foo__<T>()
+    }
 
     sealed class Foo {
         class Foo1(val a: Request, val b: Continuation<String>) : Foo()
@@ -185,13 +229,6 @@ class Example5Test {
     suspend fun <T> foo___(f: (Continuation<T>) -> Foo): T {
         return suspendCoroutineUninterceptedOrReturn<T> {
             continuations = f(it)
-            COROUTINE_SUSPENDED
-        }
-    }
-
-    suspend fun <T> foo____(f: (Continuation<T>) -> Foo_): T {
-        return suspendCoroutineUninterceptedOrReturn<T> {
-            continuations_ = f(it)
             COROUTINE_SUSPENDED
         }
     }
